@@ -22,8 +22,6 @@ def main():
   outFile.write(str(num_pos))
   outFile.write(',0,0,0\x0a\x0d///TOOL 0\x0a\x0d///RECTAN\x0a\x0d///RCONF 0,0,0,0,0\x0a\x0d')
   #for C in range(num_pos):
-    
-  
 
 if __name__ == "__main__":
   main()
