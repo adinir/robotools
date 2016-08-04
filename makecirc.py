@@ -1,10 +1,46 @@
 #!/usr/bin/python
 import os,sys
+from datetime import datetime, date, time
 #import erc
 #robot = erc.ERC()
 
-num_circle_steps = 10
-num_pos = num_circle_steps + 2
+circle_radius = ((23-6.5)/2)
+circle_steps = 10
+startAboveDistance = 50 # how far above homing point the first move should be
+startAboveSpeed = 46 # 11 23 46 etc 187
+cutDepth = 10
+cutSpeed = 11
+num_pos = circle_steps + 2
+Cnum = 0 # coordinate number or MOV number starts at 0
+
+outFile = sys.stdout #open('','w')
+
+def writeHeader(num_pos,jobName):
+  global outFile
+  outFile.write('/JOB\x0a\x0d//NAME '+jobName+'\x0a\x0d//POS\x0a\x0d///NPOS ')
+  outFile.write(str(num_pos))
+  outFile.write(',0,0,0\x0a\x0d///TOOL 0\x0a\x0d///RECTAN\x0a\x0d///RCONF 0,0,0,0,0\x0a\x0d')
+
+def writeMain():
+  global outFile
+  outFile.write('//INST\x0a\x0d///DATE ')
+  outFile.write(datetime.now().strftime("%Y/%m/%d %H:%M")) # 2016/08/02 21:44
+  outFile.write('\x0a\x0d///ATTR 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0\x0a\x0d///FRAME BASE\x0a\x0dNOP\x0a\x0d*1\x0a\x0d')
+
+def writeCoord(x,y,z,angle):
+  global Cnum,outFile
+  outFile.write('C'+str(Cnum).zfill(3)+'='+str(x)+','+str(y)+','+str(z)+','+angle+'\x0a\x0d')
+  Cnum += 1
+
+def writeMOVL(velocity):
+  global outFile
+  outFile.write('MOVL V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0a\x0d')
+  Cnum += 1
+
+def writeMOVC(velocity):
+  global outFile
+  outFile.write('MOVC V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0a\x0d')
+  Cnum += 1
 
 def main():
   #RPOS = robot.execute_command('RPOS')
@@ -13,15 +49,12 @@ def main():
   y = float(RPOS[1])
   z = float(RPOS[2])
   angle = ','.join(RPOS[3:6])
-  print(angle)
-  print(x)
-  print(y)
-  print(z)
-  outFile = sys.stdout #open('','w')
-  outFile.write('/JOB\x0a\x0d//NAME CIRC\x0a\x0d//POS\x0a\x0d///NPOS ')
-  outFile.write(str(num_pos))
-  outFile.write(',0,0,0\x0a\x0d///TOOL 0\x0a\x0d///RECTAN\x0a\x0d///RCONF 0,0,0,0,0\x0a\x0d')
-  #for C in range(num_pos):
+  writeHeader(num_pos,'CIRC')
+  writeCoord(x,y,z+startAboveDistance,angle)
+  writeCoord(x,y,z,angle)
+  for i in range(circle_steps):
+    writeCoord(x,y,z-cutDepth,angle)
+  writeMain()
 
 if __name__ == "__main__":
   main()
