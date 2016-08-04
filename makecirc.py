@@ -8,6 +8,7 @@ circle_radius = ((23-6.5)/2)
 circle_steps = 10
 startAboveDistance = 50 # how far above homing point the first move should be
 startAboveSpeed = 46 # 11 23 46 etc 187
+descendToHomeSpeed = 46 # just moving from above to touchoff point
 cutDepth = 10
 cutSpeed = 11
 num_pos = circle_steps + 2
@@ -22,10 +23,15 @@ def writeHeader(num_pos,jobName):
   outFile.write(',0,0,0\x0a\x0d///TOOL 0\x0a\x0d///RECTAN\x0a\x0d///RCONF 0,0,0,0,0\x0a\x0d')
 
 def writeMain():
-  global outFile
+  global Cnum,outFile
+  Cnum = 0 # reset the counter for the main part of the program
   outFile.write('//INST\x0a\x0d///DATE ')
   outFile.write(datetime.now().strftime("%Y/%m/%d %H:%M")) # 2016/08/02 21:44
   outFile.write('\x0a\x0d///ATTR 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0\x0a\x0d///FRAME BASE\x0a\x0dNOP\x0a\x0d*1\x0a\x0d')
+
+def writeLine(text):
+  global outFile
+  outFile.write(text+'\x0a\x0d')
 
 def writeCoord(x,y,z,angle):
   global Cnum,outFile
@@ -33,12 +39,12 @@ def writeCoord(x,y,z,angle):
   Cnum += 1
 
 def writeMOVL(velocity):
-  global outFile
+  global Cnum,outFile
   outFile.write('MOVL V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0a\x0d')
   Cnum += 1
 
 def writeMOVC(velocity):
-  global outFile
+  global Cnum,outFile
   outFile.write('MOVC V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0a\x0d')
   Cnum += 1
 
@@ -55,6 +61,13 @@ def main():
   for i in range(circle_steps):
     writeCoord(x,y,z-cutDepth,angle)
   writeMain()
+  writeMOVL(startAboveSpeed)
+  writeLine('PAUSE')
+  writeMOVL(descendToHomeSpeed)
+  for i in range(circle_steps):
+    writeMOVC(cutSpeed)
+  writeLine('JUMP *1')
+  writeLine('END')
 
 if __name__ == "__main__":
   main()
