@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import os,sys,math
 from datetime import datetime, date, time
-#import erc
-#robot = erc.ERC()
+import erc
+robot = erc.ERC()
 
 circle_radius = ((23-6.5)/2)
 circle_steps = 13
@@ -49,8 +49,7 @@ def writeMOVC(velocity):
   Cnum += 1
 
 def main():
-  #RPOS = robot.execute_command('RPOS')
-  RPOS = ['911.817', '-764.452', '258.905', '-80.46', '-81.78', '-77.02', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+  RPOS = robot.execute_command('RPOS') #RPOS = ['911.817', '-764.452', '258.905', '-80.46', '-81.78', '-77.02', '0', '0', '0', '0', '0', '0', '0', '0', '0']
   x = float(RPOS[0])
   y = float(RPOS[1])
   z = float(RPOS[2])
