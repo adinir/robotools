@@ -1,11 +1,11 @@
 #!/usr/bin/python
-import os,sys
+import os,sys,math
 from datetime import datetime, date, time
 #import erc
 #robot = erc.ERC()
 
 circle_radius = ((23-6.5)/2)
-circle_steps = 10
+circle_steps = 13
 startAboveDistance = 50 # how far above homing point the first move should be
 startAboveSpeed = 46 # 11 23 46 etc 187
 descendToHomeSpeed = 46 # just moving from above to touchoff point
@@ -59,7 +59,8 @@ def main():
   writeCoord(x,y,z+startAboveDistance,angle)
   writeCoord(x,y,z,angle)
   for i in range(circle_steps):
-    writeCoord(x,y,z-cutDepth,angle)
+    rads = 2 * math.pi / (circle_steps - 1) * i
+    writeCoord(x+circle_radius*math.cos(rads),y+circle_radius*math.sin(rads),z-cutDepth,angle)
   writeMain()
   writeMOVL(startAboveSpeed)
   writeLine('PAUSE')
