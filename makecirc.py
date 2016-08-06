@@ -35,7 +35,7 @@ def writeLine(text):
 
 def writeCoord(x,y,z,angle):
   global Cnum,outFile
-  outFile.write('C'+str(Cnum).zfill(3)+'='+str(x)+','+str(y)+','+str(z)+','+angle+'\x0a\x0d')
+  outFile.write('C'+str(Cnum).zfill(3)+'='+'%0.3f,%0.3f,%0.3f,' % (x,y,z)+angle+'\x0a\x0d')
   Cnum += 1
 
 def writeMOVL(velocity):
