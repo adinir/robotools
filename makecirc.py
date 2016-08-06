@@ -11,7 +11,7 @@ startAboveSpeed = 46 # how fast to move to above point
 descendToEntryPointSpeed = 46 # just moving from above to before starting to cut
 cutDepth = 10 # in millimeters, how far below present robot position to cut
 cutSpeed = 11 # 11 23 46 etc 187
-num_pos = circle_steps + 2 # total number of coordinates including circle steps
+num_pos = 3 + (circle_steps - 1) # total number of coordinates including circle steps
 programName = 'MAKECIRC' # what the program will be called inside the robot
 
 Cnum = 0 # coordinate number or MOV number starts at 0, used for writing robot program
@@ -60,14 +60,16 @@ def main():
   writeHeader(num_pos,programName) # write the beginning of the robot program
   writeCoord(x,y,z+startAboveDistance,angle) # go to the position above the circle center
   writeCoord(x+circle_radius,y,z,angle) # after PAUSE, go to directly above the circle edge
-  for i in range(circle_steps): # calculate coordinates for all steps of the circle cut
+  writeCoord(x+circle_radius,y,z-cutDepth,angle) # then cut 1st step of circle by moving straight down
+  for i in range(1,circle_steps): # calculate coordinates for all remaining steps of the circle cut
     rads = 2 * math.pi / (circle_steps - 1) * i # how far around the circle are we, in radians
     writeCoord(x+circle_radius*math.cos(rads),y+circle_radius*math.sin(rads),z-cutDepth,angle)
   writeMain() # before we can write the instructions of the robot program
   writeMOVL(startAboveSpeed) # move to first coordinate at the appropriate speed
   writeLine('PAUSE') # stop the program until the operator hits the GO button again
   writeMOVL(descendToEntryPointSpeed) # descend to the point right above the edge of the circle
-  for i in range(circle_steps): # cut the circle step by step
+  writeMOVL(cutSpeed) # cut straight down into the first point of the circle
+  for i in range(1,circle_steps): # cut the rest of the circle step by step
     writeMOVC(cutSpeed)
   writeLine('JUMP *1') # at the end of the program, go to the first position and ready to run again
   writeLine('END') # goes at the end of every robot program
