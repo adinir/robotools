@@ -56,7 +56,7 @@ def main():
   angle = ','.join(RPOS[3:6])
   writeHeader(num_pos,'CIRC')
   writeCoord(x,y,z+startAboveDistance,angle)
-  writeCoord(x,y,z,angle)
+  writeCoord(x+circle_radius,y,z,angle)
   for i in range(circle_steps):
     rads = 2 * math.pi / (circle_steps - 1) * i
     writeCoord(x+circle_radius*math.cos(rads),y+circle_radius*math.sin(rads),z-cutDepth,angle)
