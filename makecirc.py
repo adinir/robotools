@@ -46,12 +46,12 @@ def writeLine(text): # write an arbitrary instruction in the robot program
 
 def writeMOVL(velocity): # write a linear movement command to the robot program
   global Cnum
-  writeFileAndPrint('MOVL V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0d\x0a')
+  writeFileAndPrint('MOVL C'+str(Cnum).zfill(3)+' V='+str(velocity)+' CONT\x0d\x0a')
   Cnum += 1
 
 def writeMOVC(velocity): # write a circular movement command to the robot program
   global Cnum
-  writeFileAndPrint('MOVC V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0d\x0a')
+  writeFileAndPrint('MOVC C'+str(Cnum).zfill(3)+' V='+str(velocity)+' CONT\x0d\x0a')
   Cnum += 1
 
 def uploadFile(filename): # upload a file to the robot
