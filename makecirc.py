@@ -3,6 +3,7 @@ import os,sys,math # for reading/writing files, and sine, cosine and pi function
 from datetime import datetime, date, time # so we can put datetime in program
 import erc # for talking to the robot, from https://github.com/glvnst/yasnac/tree/master/remote
 robot = erc.ERC() # instance of talking to the robot
+erc.DEBUG = False # tell erc.py not to dump debugging data to screen
 
 circle_radius = ((23-6.5)/2) # in millimeters
 circle_steps = 13 # number of points specified along the circle
@@ -18,36 +19,39 @@ Cnum = 0 # coordinate number or MOV number starts at 0, used for writing robot p
 
 outFile = open(programName+'.JBI','w') # write a file to upload to the robot
 
-def writeHeader(num_pos,jobName): # write the beginning part of a standard robot job
+def writeFileAndPrint(data):
   global outFile
-  outFile.write('/JOB\x0a\x0d//NAME '+jobName+'\x0a\x0d//POS\x0a\x0d///NPOS ')
-  outFile.write(str(num_pos))
-  outFile.write(',0,0,0\x0a\x0d///TOOL 0\x0a\x0d///RECTAN\x0a\x0d///RCONF 0,0,0,0,0\x0a\x0d')
+  outFile.write(data)
+  sys.stdout.write(data)
+
+def writeHeader(num_pos,jobName): # write the beginning part of a standard robot job
+  writeFileAndPrint('/JOB\x0d\x0a//NAME '+jobName+'\x0d\x0a//POS\x0d\x0a///NPOS ')
+  writeFileAndPrint(str(num_pos))
+  writeFileAndPrint(',0,0,0\x0d\x0a///TOOL 0\x0d\x0a///RECTAN\x0d\x0a///RCONF 0,0,0,0,0\x0d\x0a')
 
 def writeCoord(x,y,z,angle): # write a coordinate to the robot program
-  global Cnum,outFile
-  outFile.write('C'+str(Cnum).zfill(3)+'='+'%0.3f,%0.3f,%0.3f,' % (x,y,z)+angle+'\x0a\x0d')
+  global Cnum
+  writeFileAndPrint('C'+str(Cnum).zfill(3)+'='+'%0.3f,%0.3f,%0.3f,' % (x,y,z)+angle+'\x0d\x0a')
   Cnum += 1
 
 def writeMain(): # write the part after coordinates and before instructions
-  global Cnum,outFile
+  global Cnum
   Cnum = 0 # reset the counter for the main part of the robot program
-  outFile.write('//INST\x0a\x0d///DATE ')
-  outFile.write(datetime.now().strftime("%Y/%m/%d %H:%M")) # 2016/08/02 21:44
-  outFile.write('\x0a\x0d///ATTR 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0\x0a\x0d///FRAME BASE\x0a\x0dNOP\x0a\x0d*1\x0a\x0d')
+  writeFileAndPrint('//INST\x0d\x0a///DATE ')
+  writeFileAndPrint(datetime.now().strftime("%Y/%m/%d %H:%M")) # 2016/08/02 21:44
+  writeFileAndPrint('\x0d\x0a///ATTR 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0\x0d\x0a///FRAME BASE\x0d\x0aNOP\x0d\x0a*1\x0d\x0a')
 
 def writeLine(text): # write an arbitrary instruction in the robot program
-  global outFile
-  outFile.write(text+'\x0a\x0d')
+  writeFileAndPrint(text+'\x0d\x0a')
 
 def writeMOVL(velocity): # write a linear movement command to the robot program
-  global Cnum,outFile
-  outFile.write('MOVL V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0a\x0d')
+  global Cnum
+  writeFileAndPrint('MOVL V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0d\x0a')
   Cnum += 1
 
 def writeMOVC(velocity): # write a circular movement command to the robot program
-  global Cnum,outFile
-  outFile.write('MOVC V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0a\x0d')
+  global Cnum
+  writeFileAndPrint('MOVC V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0d\x0a')
   Cnum += 1
 
 def uploadFile(filename): # upload a file to the robot
@@ -63,7 +67,9 @@ def uploadFile(filename): # upload a file to the robot
 
 def main():
   #RPOS = ['500.000', '200.000', '800.000', '-80.46', '-81.78', '-77.02', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+  print('asking robot for its coordinates, robot must be in REMOTE mode')
   RPOS = robot.execute_command('RPOS') # ask the robot its present position, directly above the center of the circle
+  print(RPOS)
   x = float(RPOS[0]) # retrieve values from robot's response to RPOS query
   y = float(RPOS[1])
   z = float(RPOS[2])
@@ -86,7 +92,7 @@ def main():
   writeLine('END') # goes at the end of every robot program
   outFile.close()
   print('asking robot to receive '+outFile.name)
-  uploadFile(outFile.name)
+  print(uploadFile(outFile.name))
 
 if __name__ == "__main__":
   main()
