@@ -16,7 +16,7 @@ programName = 'MAKECIRC' # what the program will be called inside the robot
 
 Cnum = 0 # coordinate number or MOV number starts at 0, used for writing robot program
 
-outFile = sys.stdout #open('','w') # this will change to writing a file to upload to robot
+outFile = open(programName+'.JBI','w') # write a file to upload to the robot
 
 def writeHeader(num_pos,jobName): # write the beginning part of a standard robot job
   global outFile
@@ -50,6 +50,17 @@ def writeMOVC(velocity): # write a circular movement command to the robot progra
   outFile.write('MOVC V='+str(velocity)+' C'+str(Cnum).zfill(3)+' CONT\x0a\x0d')
   Cnum += 1
 
+def uploadFile(filename): # upload a file to the robot
+  global robot
+  rootname = erc.filename_to_rootname(filename)
+  remote_files = robot.execute_command("RJDIR *")
+  if rootname in remote_files:
+    print ('A job named "{}" already exists on the robot, it will '
+	   'now be deleted to enable this upload').format(rootname)
+    robot.execute_command("DELETE {}".format(rootname))
+  print "putting " + filename
+  return robot.put_file(filename)
+
 def main():
   #RPOS = ['500.000', '200.000', '800.000', '-80.46', '-81.78', '-77.02', '0', '0', '0', '0', '0', '0', '0', '0', '0']
   RPOS = robot.execute_command('RPOS') # ask the robot its present position, directly above the center of the circle
@@ -73,6 +84,9 @@ def main():
     writeMOVC(cutSpeed)
   writeLine('JUMP *1') # at the end of the program, go to the first position and ready to run again
   writeLine('END') # goes at the end of every robot program
+  outFile.close()
+  print('asking robot to receive '+outFile.name)
+  uploadFile(outFile.name)
 
 if __name__ == "__main__":
   main()
