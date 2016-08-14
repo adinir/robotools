@@ -92,7 +92,7 @@ def main():
   writeLine('END') # goes at the end of every robot program
   outFile.close()
   print('asking robot to receive '+outFile.name)
-  print(uploadFile(outFile.name))
+  print('Errors uploading: '+str(uploadFile(outFile.name)))
 
 if __name__ == "__main__":
   main()
